@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { BookService } from "../services/books.service";
 
+// TODO: create a better error validation
+
 export class BookController {
     private bookService: BookService;
     constructor() {
@@ -19,7 +21,7 @@ export class BookController {
     async listBooks(req: Request, res: Response) {
         try {
             const search = req.query.search as string | undefined;
-            const books = await this.bookService.listBooks(search);
+            await this.bookService.listBooks(search);
         } catch (error) {
             res.status(500).json({ error: error instanceof Error ? error.message : 'Failed to list books' });
         }
@@ -31,6 +33,7 @@ export class BookController {
             if (!book) {
                 res.status(404).json({ error: 'Book not found' });
             }
+            res.json({ book });
         } catch (error) {
             res.status(500).json({
                 error: error instanceof Error ? error.message : 'Failed to get book'
