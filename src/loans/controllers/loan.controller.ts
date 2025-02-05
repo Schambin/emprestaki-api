@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { LoanService } from '../services/loan.service';
+import { LoanService } from '../loans/services/loan.service';
 import { authenticate, authorize } from '../middleware/auth.middleware';
-import { CreateLoanDto } from '../dtos/create-loan.dto';
+import { CreateLoanDto } from '../loans/dtos/create-loan.dto';
 import { validateRequest } from '../middleware/validate.middleware';
 
 export class LoanController {
