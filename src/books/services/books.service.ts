@@ -19,4 +19,12 @@ export class BookService {
     async getBookById(id: number) {
         return this.bookRepository.findUnique(id);
     }
+
+    async updateBook(id: number, data: string) {
+        return this.bookRepository.updateBook(id, data);
+    }
+
+    async deleteBook(id: number) {
+        return this.bookRepository.deleteBook(id)
+    }
 }

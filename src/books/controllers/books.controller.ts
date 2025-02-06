@@ -40,4 +40,27 @@ export class BookController {
             });
         }
     }
+
+    async updateBook(req: Request, res: Response) {
+        try {
+            const book = await this.bookService.getBookById(parseInt(req.params.id));
+            await this.bookService.updateBook(parseInt(req.params.id), req.body);
+            res.json({ message: 'Book updated successfully', book });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Update Failed :('
+            const status = message === 'Book not found' ? 404 : 400
+            res.status(status).json({ error: message });
+        }
+    }
+
+    async deleteBook(req: Request, res: Response) {
+        try {
+            await this.bookService.deleteBook(parseInt(req.params.id));
+            res.json({ message: 'Book deleted successfully' });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Deletion failed';
+            const status = message === 'Book not found' ? 404 : 400;
+            res.status(status).json({ error: message });
+        }
+    }
 }
