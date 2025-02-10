@@ -1,26 +1,12 @@
-import prisma from "../prisma/client";
-import { Loan, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import prisma from "../../prisma/client";
 
 export class LoanRepository {
-    async create(data: Prisma.LoanCreateInput): Promise<Loan> {
+    async create(data: Prisma.LoanCreateInput){
         return prisma.loan.create({ data });
     }
 
-    async findById(id: number): Promise<Loan | null> {
-        return prisma.loan.findUnique({
-            where: { id },
-            include: { book: true, user: true }
-        });
-    }
-
-    async update(id: number, data: Prisma.LoanUpdateInput): Promise<Loan> {
-        return prisma.loan.update({
-            where: { id },
-            data,
-        });
-    }
-
-    async findActiveLoansByUser(userId: number): Promise<Loan[]> {
+    async findActiveLoansByUser(userId: number){
         return prisma.loan.findMany({
             where: {
                 userId,
@@ -30,7 +16,21 @@ export class LoanRepository {
         });
     }
 
-    async findOverdueLoans(): Promise<Loan[]> {
+    async findById(id: number){
+        return prisma.loan.findUnique({
+            where: { id },
+            include: { book: true, user: true }
+        });
+    }
+
+    async update(id: number, data: Prisma.LoanUpdateInput){
+        return prisma.loan.update({
+            where: { id },
+            data,
+        });
+    }
+
+    async findOverdueLoans(){
         return prisma.loan.findMany({
             where: {
                 returnDate: null,
