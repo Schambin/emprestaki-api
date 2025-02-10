@@ -1,20 +1,16 @@
 import { Request, Response } from 'express';
-import { LoanService } from '../loans/services/loan.service';
-import { authenticate, authorize } from '../middleware/auth.middleware';
-import { CreateLoanDto } from '../loans/dtos/create-loan.dto';
-import { validateRequest } from '../middleware/validate.middleware';
+import { LoanService } from '../services/loan.service';
+import { LoanLimitExceededError, UnpaidFinesError } from '../errors/loan.errors';
 
 export class LoanController {
     private loanService = new LoanService();
 
     async createLoan(req: Request, res: Response) {
         try {
-            const loan = await this.loanService.createLoan(req.user.id, req.body.bookId);
-            res.status(201).json(loan);
+            const loan = await this.loanService.createLoan(req.user.id, req.body.bookId)
+            res.status(201).json({ loan })
         } catch (error) {
-            res.status(400).json({
-                error: error instanceof Error ? error.message : 'Loan creation failed'
-            });
+            this.handleLoanError(error, res);   // TODO
         }
     }
 
@@ -22,62 +18,39 @@ export class LoanController {
         try {
             const loanId = parseInt(req.params.id);
             const updatedLoan = await this.loanService.returnLoan(loanId);
-            res.json(updatedLoan);
+            res.json({ updatedLoan })
         } catch (error) {
-            res.status(400).json({
-                error: error instanceof Error ? error.message : 'Return failed'
-            });
+            this.handleLoanError(error, res);   // TODO
         }
     }
 
     async getUserLoans(req: Request, res: Response) {
         try {
             const loans = await this.loanService.getUserLoans(req.user.id);
-            res.json(loans);
+            res.json({ loans });
         } catch (error) {
-            res.status(500).json({
-                error: 'Failed to retrieve loans'
-            });
+            res.status(500).json({ error: 'Failed to retrieve loans' });
         }
     }
 
-    // Admin-only endpoint
     async getOverdueLoans(req: Request, res: Response) {
         try {
             const loans = await this.loanService.getOverdueLoans();
-            res.json(loans);
+            res.json({ loans });
         } catch (error) {
-            res.status(500).json({
-                error: 'Failed to retrieve overdue loans'
-            });
+            res.status(500).json({ error: 'Failed to retrieve overdue loans' });
         }
     }
-}
 
-export const loanRoutes = (router: import('express').Router) => {
-    const controller = new LoanController();
+    private handleLoanError(error: unknown, res: Response) {
+        const statusMap = new Map([
+            [LoanLimitExceededError.name, 400],
+            [UnpaidFinesError.name, 403],
+        ]);
+        
+        const message = error instanceof Error ? error.message : 'Loan operation failed';
+        const status = statusMap.get(error?.constructor?.name) || 400;
 
-    router.post('/loans',
-        authenticate,
-        validateRequest(CreateLoanDto),
-        controller.createLoan
-    );
-
-    router.patch('/loans/:id/return',
-        authenticate,
-        controller.returnBook
-    );
-
-    router.get('/loans/me',
-        authenticate,
-        controller.getUserLoans
-    );
-
-    router.get('/loans/overdue',
-        authenticate,
-        authorize(['ADMINISTRADOR']),
-        controller.getOverdueLoans
-    );
-
-    return router;
+        res.status(status).json({ error: message })
+    }
 };
