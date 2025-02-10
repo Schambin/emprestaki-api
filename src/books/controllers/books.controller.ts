@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { BookService } from "../services/books.service";
+import { CreateBookDto } from "../dtos/createBook.dto";
 
 // TODO: create a better error validation
 
@@ -11,7 +12,8 @@ export class BookController {
 
     async createBook(req: Request, res: Response) {
         try {
-            const book = await this.bookService.createBook(req.body);
+            const dto: CreateBookDto = req.body;
+            const book = await this.bookService.createBook(dto);
             res.status(201).json({ message: 'Book Created Successfully', book });
         } catch (error) {
             res.status(400).json({ error: error instanceof Error ? error.message : 'Failed to create book' });
@@ -30,9 +32,11 @@ export class BookController {
     async getBookById(req: Request, res: Response, next: NextFunction) {
         try {
             const book = await this.bookService.getBookById(parseInt(req.params.id));
+            
             if (!book) {
                 res.status(404).json({ error: 'Book not found' });
             }
+            
             res.json({ book });
         } catch (error) {
             res.status(500).json({
