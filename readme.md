@@ -18,7 +18,7 @@ MVP > O sistema deve permitir >
 
 # Requisitos não funcionais
 
-* O Sistema deve ser desenvolvido utilizando VueJs no Front e ExpressJs no Back
+* O Sistema deve ser desenvolvido utilizando VueJs no Front e Express no Back
 * O Banco de dados deve ser implementado utilizando PostgreSQL
 * O Sistema deve utilizar JWT para autenticação
 * O tempo de resposta das APIs deve ser inferior a 500ms para operações simples(CRUDs)
@@ -35,7 +35,7 @@ MVP > O sistema deve permitir >
 ## Módulo de livros
 - [] O sistema deve permitir o cadastro, edição e exclusão de um ou mais livros(Somente admins)
 - [] O sistema deve permitir que usuarios busquem e listem livros por titulo, autor ou categoria
-- [] O sistema deve exibir o status dos livros
+- [x] O sistema deve exibir o status dos livros
 
 ## Módulo de emprestimo
 - [] O sistema deve permitir que um usuário alugue um livro disponível
@@ -51,9 +51,9 @@ MVP > O sistema deve permitir >
 # Regras de Negocio
 * Um usuario pode alugar no até *3 livros simultaneamente*
 * O prazo para *devolução* de um livro é no máximo *7 dias úteis*
-* O valor da multa é R$5.00 por dia de atraso
-* Um usuário não pode alugar um novo livro se tiver multas pendentes
-* Somente admins podem cadastrar/editar/excluir livros
+* O valor da multa é *R$5.00 por dia de atraso*
+* Um *usuário não pode alugar* um novo livro *se tiver multas pendentes*
+* *Somente *admins podem cadastrar/editar/excluir* livros
 
 
 TODO:
