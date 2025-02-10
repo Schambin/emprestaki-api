@@ -37,26 +37,30 @@ model User {
   id        Int       @id @default(autoincrement())
   name      String
   email     String    @unique
-  password  String
+  password  String    @db.VarChar(100)
   role      Role      @default(LEITOR)
   loans     Loan[]
   payments  Payment[]
   logs      Log[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@index([email])
+  @@index([createdAt])
+  @@index([deletedAt])
 }
 
 model Book {
   id        Int        @id @default(autoincrement())
-  title     String
-  author    String
-  category  String
+  title     String     @db.VarChar(255)
+  author    String     @db.VarChar(255)
+  category  String     @db.VarChar(100)
   status    BookStatus @default(AVAILABLE)
   loans     Loan[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
 
   @@index([title])
   @@index([author])
@@ -67,9 +71,9 @@ model Book {
 model Loan {
   id           Int       @id @default(autoincrement())
   userId       Int
-  user         User      @relation(fields: [userId], references: [id])
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   bookId       Int
-  book         Book      @relation(fields: [bookId], references: [id])
+  book         Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
   checkoutDate DateTime
   dueDate      DateTime
   returnDate   DateTime?
@@ -78,19 +82,22 @@ model Loan {
   payment      Payment?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
 
   @@index([userId])
   @@index([bookId])
   @@index([paid])
   @@index([dueDate])
+  @@index([returnDate])
+  @@index([checkoutDate])
 }
 
 model Payment {
   id          Int      @id @default(autoincrement())
   userId      Int
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   loanId      Int      @unique
-  loan        Loan     @relation(fields: [loanId], references: [id])
+  loan        Loan     @relation(fields: [loanId], references: [id], onDelete: Cascade)
   amount      Float
   paymentDate DateTime @default(now())
   createdAt   DateTime @default(now())
@@ -98,13 +105,14 @@ model Payment {
 
   @@index([userId])
   @@index([loanId])
+  @@index([paymentDate])
 }
 
 model Log {
   id        Int        @id @default(autoincrement())
   action    ActionType
   userId    Int
-  user      User       @relation(fields: [userId], references: [id])
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   details   String?
   createdAt DateTime   @default(now())
 
