@@ -1,7 +1,10 @@
+import { LoanRepository } from "../../loans/repositories/loan.repository";
 import prisma from "../../prisma/client";
 import * as bcrypt from 'bcrypt';
 
 export class UserService {
+    private loanRepository = new LoanRepository();
+
     async createUser(name: string, email: string, password: string, role?: 'LEITOR' | 'ADMINISTRADOR') {
 
         const existingUser = await prisma.user.findUnique({
@@ -36,5 +39,10 @@ export class UserService {
         return prisma.user.findUnique({
             where: { id: userId }, include: { loans: { where: { returnDate: null}, include: { book: true }}}
         });
+    }
+
+    async hasUnpaidFines(userId: number) {
+        const unpaidFines = await this.loanRepository.findActiveLoansByUser(userId);
+        return unpaidFines.length > 0
     }
 }
