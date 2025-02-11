@@ -7,10 +7,10 @@ export class LoanController {
 
     async createLoan(req: Request, res: Response) {
         try {
-            const loan = await this.loanService.createLoan(req.user.id, req.body.bookId)
+            const loan = await this.loanService.createLoan(req.body.user.id, req.body.bookId)
             res.status(201).json({ loan })
         } catch (error) {
-            this.handleLoanError(error, res);   // TODO
+            this.handleLoanError(error, res);
         }
     }
 
@@ -20,13 +20,13 @@ export class LoanController {
             const updatedLoan = await this.loanService.returnLoan(loanId);
             res.json({ updatedLoan })
         } catch (error) {
-            this.handleLoanError(error, res);   // TODO
+            this.handleLoanError(error, res);
         }
     }
 
     async getUserLoans(req: Request, res: Response) {
         try {
-            const loans = await this.loanService.getUserLoans(req.user.id);
+            const loans = await this.loanService.getUserLoans(req.body.user.id);
             res.json({ loans });
         } catch (error) {
             res.status(500).json({ error: 'Failed to retrieve loans' });
@@ -43,14 +43,18 @@ export class LoanController {
     }
 
     private handleLoanError(error: unknown, res: Response) {
-        const statusMap = new Map([
+        const statusMap = new Map<string, number>([
             [LoanLimitExceededError.name, 400],
             [UnpaidFinesError.name, 403],
         ]);
-        
-        const message = error instanceof Error ? error.message : 'Loan operation failed';
-        const status = statusMap.get(error?.constructor?.name) || 400;
 
-        res.status(status).json({ error: message })
+        const message = error instanceof Error ? error.message : 'Loan operation failed';
+        const errorName = error instanceof Error ? error.constructor.name : 'UnknownError';
+        const status = statusMap.get(errorName) ?? 400;
+
+        //big fucking if 
+        // const status = error instanceof LoanLimitExceededError ? 400 :error instanceof UnpaidFinesError ? 403 : 400;
+
+        res.status(status).json({ error: message });
     }
 };
