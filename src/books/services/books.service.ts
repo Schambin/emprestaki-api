@@ -1,3 +1,4 @@
+import { BookStatus } from "@prisma/client";
 import { BookRepository } from "../repositories/book.repository";
 import { CreateBookInput } from "../types/book";
 
@@ -22,6 +23,20 @@ export class BookService {
 
     async updateBook(id: number, data: string) {
         return this.bookRepository.updateBook(id, data);
+    }
+
+    async updateBookStatus(bookId: number, status: BookStatus) {
+        const book = await this.bookRepository.updateBook(bookId, { status })
+        if (!book) {
+            throw new Error('Book not found');
+        }
+
+        return book;
+    }
+
+    async isBookAvailable(bookId: number) {
+        const book = await this.bookRepository.findUnique(bookId);
+        return !!book && book.status === 'AVAILABLE'
     }
 
     async deleteBook(id: number) {
