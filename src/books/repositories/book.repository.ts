@@ -29,7 +29,7 @@ export class BookRepository {
             return await prisma.book.update({
                 where: { id },
                 data
-            })
+            });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === 'P2025') {
