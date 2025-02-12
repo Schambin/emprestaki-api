@@ -28,32 +28,32 @@ MVP > O sistema deve permitir >
 
 # Requisitos Funcionais
 ## Módulo de usuários
-- [] O sistema deve permitir o cadastro de usuários com nome, e-mail e senha
+- [X] O sistema deve permitir o cadastro de usuários com nome, e-mail e senha
 - [] O sistema deve permitir que os usuarios façam login/logout
-- [] O sistema deve permitir que um usuário tenha diferentes papéis(Admin ou Leitor)
+- [X] O sistema deve permitir que um usuário tenha diferentes papéis(Admin ou Leitor)
 
 ## Módulo de livros
-- [] O sistema deve permitir o cadastro, edição e exclusão de um ou mais livros(Somente admins)
-- [] O sistema deve permitir que usuarios busquem e listem livros por titulo, autor ou categoria
+- [X] O sistema deve permitir o cadastro, edição e exclusão de um ou mais livros(Somente admins)
+- [X] O sistema deve permitir que usuarios busquem e listem livros por titulo, autor ou categoria
 - [x] O sistema deve exibir o status dos livros
 
 ## Módulo de emprestimo
-- [] O sistema deve permitir que um usuário alugue um livro disponível
-- [] O sistema deve permitir a devolução de livros e registrar a data da devolução
-- [] O sistema deve calcular automáticamente multas por atraso
-- [] O sistema deve permitir que administradores visualizem o histórico de empréstimos
+- [X] O sistema deve permitir que um usuário alugue um livro disponível
+- [X] O sistema deve permitir a devolução de livros e registrar a data da devolução
+- [X] O sistema deve calcular automáticamente multas por atraso
+- [X] O sistema deve permitir que administradores visualizem o histórico de empréstimos
 
 ## Módulo de pagamentos
-- [] O sistema deve permitir que um usuário visualize suas multas pendentes
-- [] O sistema deve permitir o pagamento das multas e registrar no histórico
+- [X] O sistema deve permitir que um usuário visualize suas multas pendentes
+- [X] O sistema deve permitir o pagamento das multas e registrar no histórico
 
 
 # Regras de Negocio
 * Um usuario pode alugar no até *3 livros simultaneamente*
 * O prazo para *devolução* de um livro é no máximo *7 dias úteis*
-* O valor da multa é *R$5.00 por dia de atraso*
+* O valor da multa é *R$2.00 por dia de atraso*
 * Um *usuário não pode alugar* um novo livro *se tiver multas pendentes*
-* *Somente *admins podem cadastrar/editar/excluir* livros
+* *Somente admins podem cadastrar/editar/excluir livros*
 
 
 TODO:
