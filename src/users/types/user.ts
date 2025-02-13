@@ -1,11 +1,8 @@
-export type CreateBookInput = {
-    title: string;
-    author: string;
-    category: string;
-};
+import { Role } from "@prisma/client";
 
-export type UpdateBookInput = {
-    title?: string;
-    author?: string;
-    category?: string;
+export type SafeUser = {
+    id: number,
+    name: string,
+    email: string,
+    role: Role,
 };
