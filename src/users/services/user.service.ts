@@ -1,48 +1,58 @@
-import { LoanRepository } from "../../loans/repositories/loan.repository";
-import prisma from "../../prisma/client";
+import { UserRepository } from "../repositories/user.repository";
+import { User } from "@prisma/client"; 3
+import { CreateUserDto } from "../dtos/create-user.dto";
 import * as bcrypt from 'bcrypt';
+import { BadRequestError, DatabaseError, NotFoundError } from "../../errors/http.errors";
+import { UpdateUserDto } from "../dtos/update-user.dto";
 
 export class UserService {
-    private loanRepository = new LoanRepository();
+    [x: string]: any;
 
-    async createUser(name: string, email: string, password: string, role?: 'LEITOR' | 'ADMINISTRADOR') {
+    constructor(private userRepository = new UserRepository()) { }
 
-        const existingUser = await prisma.user.findUnique({
-            where: {
-                email
-            }
-        });
+    private excludePassword(user: User): Omit<User, 'password'> {
+        const { password, ...safeUser } = user;
+        return safeUser;
+    }
+
+    async createUser(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
+        const existingUser = await this.userRepository.findByEmail(createUserDto.email);
         if (existingUser) {
-            throw new Error('Email already in use');
+            throw new BadRequestError('Email already registered');
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        return prisma.user.create({
-            data: {
-                name,
-                email,
-                password: hashedPassword,
-                role: role || 'LEITOR'
-            }
+        const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+        const user = await this.userRepository.create({
+            ...createUserDto,
+            password: hashedPassword
         });
+
+        return this.excludePassword(user)
     }
 
-    async findUserByEmail(email: string) {
-        return prisma.user.findUnique({
-            where: {
-                email
-            }
-        })
+    async getUserById(userId: number): Promise<Omit<User, 'password'>> {
+        const user = await this.userRepository.findById(userId);
+        if (!user) {
+            throw new NotFoundError('User')
+        }
+
+        return this.excludePassword(user)
     }
 
-    async getUserWithLoans(userId: number) {
-        return prisma.user.findUnique({
-            where: { id: userId }, include: { loans: { where: { returnDate: null}, include: { book: true }}}
-        });
+    async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<Omit<User, 'password'>> {
+        if (updateUserDto.password) {
+            updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10)
+        }
+
+        const user = await this.userRepository.updateUser(id, updateUserDto);
+        return this.excludePassword(user);
     }
 
-    async hasUnpaidFines(userId: number) {
-        const unpaidFines = await this.loanRepository.findActiveLoansByUser(userId);
-        return unpaidFines.length > 0
+    async deleteUser(id: number): Promise<void> {
+        await this.userRepository.deleteUser(id);
+    }
+
+    async hasUnpaidFines(userId: number): Promise<boolean> {
+        return this.userRepository.hasUnpaidFines(userId);
     }
 }
