@@ -1,13 +1,10 @@
 import { BookStatus } from "@prisma/client";
 import { BookRepository } from "../repositories/book.repository";
-import { CreateBookInput } from "../types/book";
+import { CreateBookInput, UpdateBookInput } from "../types/book";
+import { BadRequestError, DatabaseError, NotFoundError } from "../../errors/http.errors";
 
 export class BookService {
-    private bookRepository: BookRepository;
-
-    constructor() {
-        this.bookRepository = new BookRepository();
-    }
+    constructor(private bookRepository = new BookRepository()) { }
 
     async createBook(data: CreateBookInput) {
         return this.bookRepository.create(data);
@@ -18,20 +15,33 @@ export class BookService {
     }
 
     async getBookById(id: number) {
-        return this.bookRepository.findUnique(id);
+        const book = await this.bookRepository.findUnique(id);
+        if (!book) {
+            throw new NotFoundError('Book');
+        }
+        return {
+            book
+        };
     }
 
-    async updateBook(id: number, data: string) {
-        return this.bookRepository.updateBook(id, data);
+    async updateBook(id: number, data: UpdateBookInput) {
+        try {
+
+            const book = await this.bookRepository.updateBook(id, data);
+            if (!book) throw new NotFoundError('Book');
+            return { book };
+
+        } catch (error) {
+            
+            if(error instanceof DatabaseError) {
+                throw new BadRequestError(error.message);
+            }
+
+        }
     }
 
     async updateBookStatus(bookId: number, status: BookStatus) {
-        const book = await this.bookRepository.updateBook(bookId, { status })
-        if (!book) {
-            throw new Error('Book not found');
-        }
-
-        return book;
+        return this.updateBook(bookId, { status });
     }
 
     async isBookAvailable(bookId: number) {
@@ -40,6 +50,8 @@ export class BookService {
     }
 
     async deleteBook(id: number) {
-        return this.bookRepository.deleteBook(id)
+        const book = await this.bookRepository.deleteBook(id)
+        if (!book) throw new NotFoundError('Book');
+        return { book }
     }
 }
