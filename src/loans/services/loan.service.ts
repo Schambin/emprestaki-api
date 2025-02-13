@@ -66,7 +66,7 @@ export class LoanService {
         return this.loanRepository.findActiveLoansByUser(userId);
     }
 
-    async getOverdueLoans(){
+    async getOverdueLoans() {
         return this.loanRepository.findOverdueLoans();
     }
 }
