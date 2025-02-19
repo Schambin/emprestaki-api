@@ -3,10 +3,7 @@ import prisma from "../../prisma/client";
 import { DatabaseError } from "../../errors/http.errors";
 
 export class BookRepository {
-    constructor() {
-        this.prisma = prisma;
-    }
-    private prisma: PrismaClient;
+    private prisma: PrismaClient = prisma;
     private buildSearchWhereClause(search: string): Prisma.BookWhereInput {
         return {
             OR: [
