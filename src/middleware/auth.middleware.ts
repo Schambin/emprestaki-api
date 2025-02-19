@@ -12,7 +12,7 @@ declare module 'express' {
 
 export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const token = req.header('Authorization')?.replace('Bearer', '');
+        const token = req.header('Authorization')?.replace('Bearer ', '');
 
         if (!token) {
             throw new UnauthorizedError('Authentication required');
@@ -42,10 +42,10 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     }
 };
 
-export const authorize = (roles: string[]) => {
+export const authorize = (allowedRoles: string[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!req.user?.role || !roles.includes(req.user.role)) {
+            if (!req.user || !allowedRoles.includes(req.user.role)) {
                 throw new ForbiddenError();
             }
             next();
