@@ -6,8 +6,6 @@ import { User } from "@prisma/client";
 import * as bcrypt from 'bcrypt';
 
 export class UserService {
-    [x: string]: any;
-
     constructor(private userRepository = new UserRepository()) { }
 
     private excludePassword(user: User): Omit<User, 'password'> {
@@ -58,5 +56,17 @@ export class UserService {
 
     async hasUnpaidFines(userId: number): Promise<boolean> {
         return this.userRepository.hasUnpaidFines(userId);
+    }
+
+    async getUserWithLoans(userId: number): Promise<Omit<User, 'password'> & { loans: Loan[] }> {
+        const user = await this.userRepository.findUserWithLoans(userId);
+        if (!user) {
+            throw new NotFoundError('User');
+        }
+        
+        return {
+            ...this.excludePassword(user),
+            loans: user.loans
+        };
     }
 }
