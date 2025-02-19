@@ -5,6 +5,7 @@ import { CreateUserDto } from "../users/dtos/create-user.dto";
 import { UserService } from "../users/services/user.service";
 import { UserController } from "../users/controllers/user.controller";
 import { AuthService } from "../users/services/auth.service";
+import { LoginDto } from "../users/dtos/login.dto";
 
 export const userRoutes = () => {
     const router = Router();
@@ -13,7 +14,8 @@ export const userRoutes = () => {
     const authService = new AuthService();
 
     // ADMIN-ONLY: Create user
-    router.post('/users',
+    // TODO: Create a better error message when dont fit the DTO and when its not an admin
+    router.post('/',
         authenticate,
         authorize(['ADMINISTRADOR']),
         validateRequest(CreateUserDto),
@@ -29,7 +31,7 @@ export const userRoutes = () => {
         }
     );
 
-    router.get('/users/me',
+    router.get('/me',
         authenticate,
         async (req, res) => {
             try {
@@ -42,20 +44,14 @@ export const userRoutes = () => {
     );
 
     router.post('/auth/login',
-        validateRequest(CreateUserDto),
-        async (req, res): Promise<any> => {
+        validateRequest(LoginDto),
+        async (req, res, next) => {
             try {
                 const user = await authService.validateUser(req.body.email, req.body.password);
-                if (!user) {
-                    return res.status(401).json({ error: 'Invalid Credentials' });
-                }
                 const token = authService.generateToken(user);
                 res.json({ access_token: token });
-
             } catch (error) {
-
-                res.status(500).json({ error: 'Login Failed' });
-
+                next(error);
             }
         }
     );
