@@ -9,7 +9,7 @@ export const validateRequest = <T extends Object>(dtoClass: new () => T) => {
         const errors = await validate(dto);
 
         if (errors.length > 0) {
-            const errorMessages = errors.flatMap(error => Object.values(error.constraints || {}));
+            const errorMessages = errors.map(error => Object.values(error.constraints || {}));
 
             return next(new BadRequestError('Validation failed', {
                 errors: errorMessages,
