@@ -26,6 +26,30 @@ async function seedAdminUser() {
         } else {
             console.log('📘 Admin user already exists');
         }
+
+
+        const readerEmail = 'reader@library.com';
+        const existingReader = await prisma.user.findUnique({
+            where: { email: readerEmail }
+        });
+
+        if (!existingReader) {
+            const hashedPassword = await bcrypt.hash('reader123', 10);
+
+            await prisma.user.create({
+                data: {
+                    name: 'Reader',
+                    email: readerEmail,
+                    password: hashedPassword,
+                    role: 'LEITOR'
+                }
+            });
+            console.log('📗 Reader user created');
+        } else {
+            console.log('📘 Reader user already exists');
+        }
+
+
     } catch (error) {
         console.error('Error seeding admin user:', error);
     } finally {
