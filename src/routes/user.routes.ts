@@ -33,14 +33,7 @@ export const userRoutes = () => {
 
     router.get('/me',
         authenticate,
-        async (req, res) => {
-            try {
-                const user = await userService.getUserWithLoans(req.body.user.id);
-                res.json({ user });
-            } catch (error) {
-                res.status(500).json({ error: 'Failed to fetch user profile' });
-            }
-        }
+        (req, res) => userController.getCurrentUser(req, res)
     );
 
     router.post('/auth/login',
