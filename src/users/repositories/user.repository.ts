@@ -1,4 +1,4 @@
-import { Prisma, User } from "@prisma/client";
+import { Loan, Prisma, User } from "@prisma/client";
 import prisma from "../../prisma/client";
 import { DatabaseError } from "../../errors/http.errors";
 
@@ -90,6 +90,23 @@ export class UserRepository {
             return unpaidCount > 0;
         } catch (error) {
             throw new DatabaseError('Failed to check unpaid fines');
+        }
+    }
+
+    async findUserWithLoans(userId: number): Promise<(User & { loans: Loan[] }) | null> {
+        try {
+            return await prisma.user.findUnique({
+                where: { id: userId },
+                include: {
+                    loans: {
+                        orderBy: {
+                            checkoutDate: 'desc'
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            throw new DatabaseError('Failed to fetch user with loans');
         }
     }
 }
