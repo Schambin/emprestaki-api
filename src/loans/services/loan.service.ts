@@ -67,6 +67,10 @@ export class LoanService {
     }
 
     async getOverdueLoans() {
-        return this.loanRepository.findOverdueLoans();
+        const loans = await this.loanRepository.findOverdueLoans();
+        return loans.map(loan => ({
+            ...loan,
+            currentFine: calculateFine(loan.dueDate)
+        }));
     }
 }
