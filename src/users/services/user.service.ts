@@ -1,9 +1,9 @@
 import { UserRepository } from "../repositories/user.repository";
-import { User } from "@prisma/client"; 3
 import { CreateUserDto } from "../dtos/create-user.dto";
-import * as bcrypt from 'bcrypt';
-import { BadRequestError, DatabaseError, NotFoundError } from "../../errors/http.errors";
+import { BadRequestError, NotFoundError } from "../../errors/http.errors";
 import { UpdateUserDto } from "../dtos/update-user.dto";
+import { User } from "@prisma/client";
+import * as bcrypt from 'bcrypt';
 
 export class UserService {
     [x: string]: any;
@@ -37,6 +37,10 @@ export class UserService {
         }
 
         return this.excludePassword(user)
+    }
+
+    async getUserByEmailWithPassword(email: string): Promise<User | null> {
+        return this.userRepository.findUserByEmail(email);
     }
 
     async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<Omit<User, 'password'>> {
