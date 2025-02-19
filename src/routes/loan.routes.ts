@@ -15,18 +15,19 @@ export const loanRoutes = () => {
         controller.createLoan
     );
 
-    router.patch('loans/:id/return',
+    router.patch('/:id/return',
         authenticate,
         authorize(['LEITOR']),
         controller.returnBook
     );
 
-    router.get('/loans/me',
+    router.get('/me',
         authenticate,
+        authorize(['LEITOR']),
         controller.getUserLoans
     );
 
-    router.get('/loans/overdue',
+    router.get('/overdue',
         authenticate,
         authorize(['ADMINISTRADOR']),
         controller.getOverdueLoans
