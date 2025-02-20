@@ -29,7 +29,6 @@ MVP > O sistema deve permitir >
 # Requisitos Funcionais
 ## Módulo de usuários
 - [X] O sistema deve permitir o cadastro de usuários com nome, e-mail e senha
-- [] O sistema deve permitir que os usuarios façam login/logout
 - [X] O sistema deve permitir que um usuário tenha diferentes papéis(Admin ou Leitor)
 
 ## Módulo de livros
