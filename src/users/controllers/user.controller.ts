@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { UserService } from '../services/user.service';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { SafeUser } from '../../users/types/user';
+import { UpdateCurrentUserDto, UpdateUserDto } from '../dtos/update-user.dto';
 
 export class UserController {
     constructor(private userService = new UserService()) { };
@@ -30,11 +31,32 @@ export class UserController {
     }
 
     async updateUser(req: Request, res: Response) {
-        const user = await this.userService.updateUser(
-            parseInt(req.params.id),
-            req.body
-        );
-        res.json({ user });
+        try {
+            const updatedUser = await this.userService.updateUser(
+                parseInt(req.params.id),
+                req.body as UpdateUserDto
+            );
+            res.json(updatedUser);
+        } catch (error) {
+            res.status(400).json({
+                error: error instanceof Error ? error.message : 'Update failed'
+            });
+        }
+    }
+
+    async updateCurrentUser(req: Request, res: Response) {
+        try {
+            const user = req.user as SafeUser;
+            const updatedUser = await this.userService.updateCurrentUser(
+                user.id,
+                req.body as UpdateCurrentUserDto
+            );
+            res.json(updatedUser);
+        } catch (error) {
+            res.status(400).json({
+                error: error instanceof Error ? error.message : 'Update failed'
+            });
+        }
     }
 
     async deleteUser(req: Request, res: Response) {

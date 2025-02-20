@@ -1,8 +1,8 @@
+import { UpdateCurrentUserDto, UpdateUserDto } from "../dtos/update-user.dto";
+import { BadRequestError, NotFoundError } from "../../errors/http.errors";
 import { UserRepository } from "../repositories/user.repository";
 import { CreateUserDto } from "../dtos/create-user.dto";
-import { BadRequestError, NotFoundError } from "../../errors/http.errors";
-import { UpdateUserDto } from "../dtos/update-user.dto";
-import { User } from "@prisma/client";
+import { Loan, User } from "@prisma/client";
 import * as bcrypt from 'bcrypt';
 
 export class UserService {
@@ -42,12 +42,30 @@ export class UserService {
     }
 
     async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<Omit<User, 'password'>> {
+        if (updateUserDto.email) {
+            const existingUser = await this.userRepository.findByEmail(updateUserDto.email);
+            if (existingUser && existingUser.id !== id) {
+                throw new BadRequestError('Email already registered');
+            }
+        }
+
         if (updateUserDto.password) {
-            updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10)
+            updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
         }
 
         const user = await this.userRepository.updateUser(id, updateUserDto);
         return this.excludePassword(user);
+    }
+
+    async updateCurrentUser(id: number, updateDto: UpdateCurrentUserDto): Promise<Omit<User, 'password'>> {
+        if (updateDto.email) {
+            const existingUser = await this.userRepository.findByEmail(updateDto.email);
+            if (existingUser && existingUser.id !== id) {
+                throw new BadRequestError('Email already registered');
+            }
+        }
+
+        return this.updateUser(id, updateDto);
     }
 
     async deleteUser(id: number): Promise<void> {
@@ -63,7 +81,7 @@ export class UserService {
         if (!user) {
             throw new NotFoundError('User');
         }
-        
+
         return {
             ...this.excludePassword(user),
             loans: user.loans

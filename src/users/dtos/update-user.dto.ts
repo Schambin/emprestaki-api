@@ -19,3 +19,18 @@ export class UpdateUserDto {
     @IsEnum(Role, { message: 'Invalid user role' })
     role?: Role;
 }
+
+export class UpdateCurrentUserDto {
+    @IsOptional()
+    @IsString()
+    name?: string;
+
+    @IsOptional()
+    @IsEmail()
+    email?: string;
+
+    @IsOptional()
+    @IsString()
+    @MinLength(6)
+    password?: string;
+}
