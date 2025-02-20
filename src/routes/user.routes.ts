@@ -1,20 +1,17 @@
-import { NextFunction, Router } from "express"
+import { UpdateCurrentUserDto, UpdateUserDto } from "../users/dtos/update-user.dto";
 import { authenticate, authorize } from "../middleware/auth.middleware";
+import { UserController } from "../users/controllers/user.controller";
 import { validateRequest } from "../middleware/validate.middleware";
 import { CreateUserDto } from "../users/dtos/create-user.dto";
-import { UserService } from "../users/services/user.service";
-import { UserController } from "../users/controllers/user.controller";
 import { AuthService } from "../users/services/auth.service";
 import { LoginDto } from "../users/dtos/login.dto";
+import { Router } from "express"
 
 export const userRoutes = () => {
     const router = Router();
     const userController = new UserController();
-    const userService = new UserService();
     const authService = new AuthService();
 
-    // ADMIN-ONLY: Create user
-    // TODO: Create a better error message when dont fit the DTO and when its not an admin
     router.post('/',
         authenticate,
         authorize(['ADMINISTRADOR']),
@@ -26,6 +23,37 @@ export const userRoutes = () => {
             } catch (error) {
                 res.status(400).json({
                     error: error instanceof Error ? error.message : 'Registration failed'
+                });
+            }
+        }
+    );
+
+    router.put('/:id',
+        authenticate,
+        authorize(['ADMINISTRADOR']),
+        validateRequest(UpdateUserDto),
+        async (req, res) => {
+            try {
+                const user = await userController.updateUser(req, res);
+                res.json(user);
+            } catch (error) {
+                res.status(400).json({
+                    error: error instanceof Error ? error.message : 'Update failed'
+                });
+            }
+        }
+    );
+
+    router.patch('/me',
+        authenticate,
+        validateRequest(UpdateCurrentUserDto),
+        async (req, res) => {
+            try {
+                const user = await userController.updateCurrentUser(req, res);
+                res.json(user);
+            } catch (error) {
+                res.status(400).json({
+                    error: error instanceof Error ? error.message : 'Update failed'
                 });
             }
         }
