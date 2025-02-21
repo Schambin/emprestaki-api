@@ -21,5 +21,19 @@ export const validateRequest = (schema: z.ZodSchema<any>) => {
         } catch (error) {
             next(error);
         }
-    };
+    };  
+};
+
+export const validateBookId = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const bookId = parseInt(req.params.id);
+
+    if (isNaN(bookId)) {
+        throw new BadRequestError('Invalid book ID format');
+    }
+
+    next();
 };
