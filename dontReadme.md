@@ -44,7 +44,7 @@ MVP > O sistema deve permitir >
 
 ## Módulo de pagamentos
 - [X] O sistema deve permitir que um usuário visualize suas multas pendentes
-- [X] O sistema deve permitir o pagamento das multas e registrar no histórico
+- [] O sistema deve permitir o pagamento das multas e registrar no histórico
 
 
 # Regras de Negocio
