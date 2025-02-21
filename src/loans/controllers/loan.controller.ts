@@ -1,35 +1,60 @@
-import { Request, Response } from 'express';
+import { CreateLoanInput, ReturnLoanInput } from '../schemas/loan.schema';
+import { BadRequestError, NotFoundError } from '../../errors/http.errors';
+import { LoanLimitExceededError } from '../../errors/http.errors';
+import { UnpaidFinesError } from '../errors/loan.errors';
 import { LoanService } from '../services/loan.service';
-import { LoanLimitExceededError, UnpaidFinesError } from '../errors/loan.errors';
+import { Request, Response } from 'express';
 import { SafeUser } from '../../users/types/user';
 
 export class LoanController {
-    private loanService = new LoanService();
+    constructor(private loanService = new LoanService()) {
+        this.bindMethods();
+    }
 
+    private bindMethods() {
+        const methods: Array<keyof LoanController> = [
+            'createLoan', 'returnBook', 'getUserLoans',
+            'getOverdueLoans'
+        ];
 
-    createLoan = async (req: Request, res: Response) => {
-        const user = req.user;
-        req.user = user as SafeUser;
+        methods.forEach(m => {
+            this[m] = (this[m] as any).bind(this);
+        });
+    }
 
+    async createLoan(req: Request, res: Response): Promise<void> {
         try {
-            const loan = await this.loanService.createLoan(req.user.id, req.body.bookId);
+            const userId = req.user!.id;
+            const { bookId } = req.body as CreateLoanInput;
+
+            const loan = await this.loanService.createLoan(userId, { bookId });
             res.status(201).json(loan);
-        } catch (error) {
-            this.handleLoanError(error, res);
+        } catch (error: any) {
+            if (error instanceof BadRequestError) {
+                res.status(400).json({ error: error.message });
+                return;
+            }
+            res.status(500).json({ error: 'Failed to create loan' });
         }
     }
 
-    returnBook = async (req: Request, res: Response) => {
+    async returnBook(req: Request, res: Response): Promise<void> {
         try {
             const loanId = parseInt(req.params.id);
-            const updatedLoan = await this.loanService.returnLoan(loanId);
+            const data = req.body as ReturnLoanInput;
+
+            const updatedLoan = await this.loanService.returnLoan(loanId, data);
             res.json(updatedLoan);
-        } catch (error) {
-            this.handleLoanError(error, res);
+        } catch (error: any) {
+            if (error instanceof NotFoundError) {
+                res.status(404).json({ error: error.message });
+                return;
+            }
+            res.status(400).json({ error: error instanceof Error ? error.message : 'Return failed' });
         }
     }
 
-    getUserLoans = async (req: Request, res: Response) => {
+    async getUserLoans(req: Request, res: Response) {
         const user = req.user;
         req.user = user as SafeUser;
 
@@ -41,7 +66,7 @@ export class LoanController {
         }
     }
 
-    getOverdueLoans = async (req: Request, res: Response) => {
+    async getOverdueLoans(req: Request, res: Response) {
         try {
             const loans = await this.loanService.getOverdueLoans();
             res.json(loans);

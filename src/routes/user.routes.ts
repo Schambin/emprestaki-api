@@ -1,11 +1,12 @@
-import { UpdateCurrentUserDto, UpdateUserDto } from "../users/dtos/update-user.dto";
+import { updateUserSchema } from "../users/schemas/update-user.schema";
+import { updateCurrentUserSchema } from "../users/schemas/create-user.schema";
 import { authenticate, authorize } from "../middleware/auth.middleware";
 import { UserController } from "../users/controllers/user.controller";
 import { validateRequest } from "../middleware/validate.middleware";
-import { CreateUserDto } from "../users/dtos/create-user.dto";
 import { AuthService } from "../users/services/auth.service";
-import { LoginDto } from "../users/dtos/login.dto";
+import { createUserSchema } from "../schemas/user.schema";
 import { Router } from "express"
+import { z } from "zod";
 
 export const userRoutes = () => {
     const router = Router();
@@ -15,57 +16,33 @@ export const userRoutes = () => {
     router.post('/',
         authenticate,
         authorize(['ADMINISTRADOR']),
-        validateRequest(CreateUserDto),
-        async (req, res) => {
-            try {
-                const user = await userController.createUser(req);
-                res.status(201).json(user);
-            } catch (error) {
-                res.status(400).json({
-                    error: error instanceof Error ? error.message : 'Registration failed'
-                });
-            }
-        }
+        validateRequest(createUserSchema),
+        userController.createUser
     );
 
     router.put('/:id',
         authenticate,
         authorize(['ADMINISTRADOR']),
-        validateRequest(UpdateUserDto),
-        async (req, res) => {
-            try {
-                const user = await userController.updateUser(req, res);
-                res.json(user);
-            } catch (error) {
-                res.status(400).json({
-                    error: error instanceof Error ? error.message : 'Update failed'
-                });
-            }
-        }
+        validateRequest(updateUserSchema),
+        userController.updateUser
     );
 
     router.patch('/me',
         authenticate,
-        validateRequest(UpdateCurrentUserDto),
-        async (req, res) => {
-            try {
-                const user = await userController.updateCurrentUser(req, res);
-                res.json(user);
-            } catch (error) {
-                res.status(400).json({
-                    error: error instanceof Error ? error.message : 'Update failed'
-                });
-            }
-        }
+        validateRequest(updateCurrentUserSchema),
+        userController.updateCurrentUser
     );
 
     router.get('/me',
         authenticate,
-        (req, res) => userController.getCurrentUser(req, res)
+        userController.getCurrentUser
     );
 
     router.post('/auth/login',
-        validateRequest(LoginDto),
+        validateRequest(z.object({
+            email: z.string().email(),
+            password: z.string().min(6)
+        })),
         async (req, res, next) => {
             try {
                 const user = await authService.validateUser(req.body.email, req.body.password);

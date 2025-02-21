@@ -1,8 +1,9 @@
+import { LoanLimitExceededError, UnpaidFinesError, BookNotAvailableError } from "../errors/loan.errors";
+import { CreateLoanInput, ReturnLoanInput } from "../schemas/loan.schema";
+import { calculateDueDate, calculateFine } from "../utils/loan.utils";
 import { LoanRepository } from "../repositories/loan.repository";
 import { BookService } from "../../books/services/books.service";
 import { UserService } from "../../users/services/user.service";
-import { calculateDueDate, calculateFine } from "../utils/loan.utils";
-import { LoanLimitExceededError, UnpaidFinesError, BookNotAvailableError } from "../errors/loan.errors";
 
 interface LoanUpdateData {
     returnDate: Date;
@@ -16,7 +17,7 @@ export class LoanService {
         private userService = new UserService(),
     ) { }
 
-    async createLoan(userId: number, bookId: number) {
+    async createLoan(userId: number, { bookId }: CreateLoanInput) {
         await this.validateLoanCreation(userId, bookId);
 
         const loan = await this.loanRepository.create({
@@ -44,7 +45,7 @@ export class LoanService {
         if (!isAvailable) throw new BookNotAvailableError(bookId);
     }
 
-    async returnLoan(loanId: number) {
+    async returnLoan(loanId: number, data: ReturnLoanInput) {
         const loan = await this.loanRepository.findById(loanId);
         if (!loan) throw new Error('Loan not found');
         if (loan.returnDate) throw new Error('Book already returned');

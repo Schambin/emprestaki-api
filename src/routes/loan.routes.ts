@@ -1,8 +1,8 @@
-import { Router } from 'express';
+import { authenticate, authorize } from '../middleware/auth.middleware';
 import { LoanController } from '../loans/controllers/loan.controller';
 import { validateRequest } from '../middleware/validate.middleware';
-import { authenticate, authorize } from '../middleware/auth.middleware';
-import { CreateLoanDto } from '../loans/dtos/loan.dto';
+import { createLoanSchema, returnLoanSchema } from '../loans/schemas/loan.schema';
+import { Router } from 'express';
 
 export const loanRoutes = () => {
     const router = Router();
@@ -11,13 +11,14 @@ export const loanRoutes = () => {
     router.post('/',
         authenticate,
         authorize(['LEITOR']),
-        validateRequest(CreateLoanDto),
+        validateRequest(createLoanSchema),
         controller.createLoan
     );
 
     router.patch('/:id/return',
         authenticate,
         authorize(['LEITOR']),
+        validateRequest(returnLoanSchema),
         controller.returnBook
     );
 

@@ -1,9 +1,8 @@
-import { UserService } from "./user.service";
-import jwt from 'jsonwebtoken';
-import * as bcrypt from 'bcrypt';
 import { UnauthorizedError } from "../../errors/http.errors";
-import { UserRepository } from "../repositories/user.repository";
+import { UserService } from "./user.service";
 import { Role } from "@prisma/client";
+import * as bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 export class AuthService {
     constructor(

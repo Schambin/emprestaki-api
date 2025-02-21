@@ -1,7 +1,6 @@
-import { UpdateCurrentUserDto, UpdateUserDto } from "../dtos/update-user.dto";
-import { BadRequestError, NotFoundError } from "../../errors/http.errors";
+import { CreateUserInput, UpdateCurrentUserInput, UpdateUserInput } from "../schemas/create-user.schema";
+import { ConflictError, NotFoundError } from "../../errors/http.errors";
 import { UserRepository } from "../repositories/user.repository";
-import { CreateUserDto } from "../dtos/create-user.dto";
 import { Loan, User } from "@prisma/client";
 import * as bcrypt from 'bcrypt';
 
@@ -13,19 +12,19 @@ export class UserService {
         return safeUser;
     }
 
-    async createUser(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
-        const existingUser = await this.userRepository.findByEmail(createUserDto.email);
+    async createUser(data: CreateUserInput) {
+        const existingUser = await this.userRepository.findByEmail(data.email);
         if (existingUser) {
-            throw new BadRequestError('Email already registered');
+            throw new ConflictError('Email already registered');
         }
 
-        const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+        const hashedPassword = await bcrypt.hash(data.password, 10);
         const user = await this.userRepository.create({
-            ...createUserDto,
+            ...data,
             password: hashedPassword
         });
 
-        return this.excludePassword(user)
+        return this.excludePassword(user);
     }
 
     async getUserById(userId: number): Promise<Omit<User, 'password'>> {
@@ -41,31 +40,25 @@ export class UserService {
         return this.userRepository.findUserByEmail(email);
     }
 
-    async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<Omit<User, 'password'>> {
-        if (updateUserDto.email) {
-            const existingUser = await this.userRepository.findByEmail(updateUserDto.email);
+    async updateUser(id: number, data: UpdateUserInput) {
+        if (data.email) {
+            const existingUser = await this.userRepository.findByEmail(data.email);
             if (existingUser && existingUser.id !== id) {
-                throw new BadRequestError('Email already registered');
+                throw new ConflictError('Email already registered');
             }
         }
 
-        if (updateUserDto.password) {
-            updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+        if (data.password) {
+            data.password = await bcrypt.hash(data.password, 10);
         }
 
-        const user = await this.userRepository.updateUser(id, updateUserDto);
+        const user = await this.userRepository.updateUser(id, data);
         return this.excludePassword(user);
     }
 
-    async updateCurrentUser(id: number, updateDto: UpdateCurrentUserDto): Promise<Omit<User, 'password'>> {
-        if (updateDto.email) {
-            const existingUser = await this.userRepository.findByEmail(updateDto.email);
-            if (existingUser && existingUser.id !== id) {
-                throw new BadRequestError('Email already registered');
-            }
-        }
 
-        return this.updateUser(id, updateDto);
+    async updateCurrentUser(id: number, data: UpdateCurrentUserInput) {
+        return this.updateUser(id, data);
     }
 
     async deleteUser(id: number): Promise<void> {

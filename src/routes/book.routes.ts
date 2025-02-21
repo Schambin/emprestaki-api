@@ -1,20 +1,22 @@
-import { Router } from "express";
-import { BookController } from "../books/controllers/books.controller";
-import { validateRequest } from "../middleware/validate.middleware";
-import { authenticate, authorize } from "../middleware/auth.middleware";
-import { CreateBookDto } from "../books/dtos/createBook.dto";
-import { UpdateBookDto } from "../books/dtos/updateBook.dto";
+import { Router } from 'express';
+import { createBookSchema } from '../books/schemas/create-book.schema';
+import { updateBookSchema } from '../books/schemas/update-book.schema';
+import { validateRequest } from '../middleware/validate.middleware';
+import { BookController } from '../books/controllers/books.controller';
+import { authenticate, authorize } from '../middleware/auth.middleware';
 
 export const bookRoutes = () => {
     const router = Router();
     const controller = new BookController();
 
-    router.post('/',
+    router.post(
+        '/',
         authenticate,
         authorize(['ADMINISTRADOR']),
-        validateRequest(CreateBookDto),
+        validateRequest(createBookSchema),
         controller.createBook
     );
+
 
     router.get('/',
         controller.listBooks
@@ -27,7 +29,7 @@ export const bookRoutes = () => {
     router.put('/:id',
         authenticate,
         authorize(['ADMINISTRADOR']),
-        validateRequest(UpdateBookDto),
+        validateRequest(updateBookSchema),
         controller.updateBook
     );
 

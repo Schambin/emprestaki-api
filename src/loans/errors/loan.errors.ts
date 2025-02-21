@@ -1,20 +1,19 @@
-export class LoanLimitExceededError extends Error {
-    constructor() {
-        super('Maximum of 3 active loans allowed');
-        this.name = 'LoanLimitExceededError';
+import { HttpError } from '../../errors/http.errors';
+
+export class LoanLimitExceededError extends HttpError {
+    constructor(maxLoans = 3) {
+        super(400, `You can't have more than ${maxLoans} active loans`);
     }
 }
 
-export class UnpaidFinesError extends Error {
+export class UnpaidFinesError extends HttpError {
     constructor() {
-        super('Cannot borrow books with unpaid fines');
-        this.name = 'UnpaidFinesError';
+        super(403, 'Please pay your outstanding fines before borrowing');
     }
 }
 
-export class BookNotAvailableError extends Error {
+export class BookNotAvailableError extends HttpError {
     constructor(bookId: number) {
-        super(`Book with ID ${bookId} is not available`);
-        this.name = 'BookNotAvailableError';
+        super(409, `Book #${bookId} is currently unavailable`);
     }
 }

@@ -1,19 +1,27 @@
 export class HttpError extends Error {
     constructor(
-        public readonly statusCode: number, message: string,
+        public readonly statusCode: number,
+        message: string,
         public readonly details?: Record<string, unknown>
     ) {
-        super(message)
+        super(message);
         this.name = this.constructor.name;
         Error.captureStackTrace(this, this.constructor);
     }
 }
 
 export class BadRequestError extends HttpError {
-    constructor(message = "Bad request", details?: Record<string, unknown>) {
-        super(400, message, details);
+    constructor(
+        message: string = "Bad request",
+        public readonly fields?: Array<{
+            path: string;
+            message: string
+        }>
+    ) {
+        super(400, message, fields ? { fields } : undefined);
     }
 }
+
 
 export class UnauthorizedError extends HttpError {
     constructor(message = "Unauthorized") {

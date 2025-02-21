@@ -1,6 +1,6 @@
+import { DatabaseError } from "../../errors/http.errors";
 import { Prisma, PrismaClient } from "@prisma/client";
 import prisma from "../../prisma/client";
-import { DatabaseError } from "../../errors/http.errors";
 
 export class BookRepository {
     private prisma: PrismaClient = prisma;

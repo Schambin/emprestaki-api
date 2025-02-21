@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
-import prisma from "../prisma/client";
-import { SafeUser } from "../users/types/user";
 import { ForbiddenError, UnauthorizedError } from "../errors/http.errors";
+import { NextFunction, Request, Response } from "express";
+import { SafeUser } from "../users/types/user";
+import prisma from "../prisma/client";
+import jwt from "jsonwebtoken";
 
 declare module 'express' {
     interface Request {
