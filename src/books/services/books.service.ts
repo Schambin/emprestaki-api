@@ -55,4 +55,16 @@ export class BookService {
         if (!book) throw new NotFoundError('Book');
         return { book }
     }
+
+    async searchBooks(searchTerm: string, page?: number, pageSize?: number) {
+        if (!searchTerm || searchTerm.trim().length < 2) {
+            throw new BadRequestError('Search term must be at least 2 characters');
+        }
+
+        return this.bookRepository.searchBooks(
+            searchTerm.trim(),
+            page || 1,
+            pageSize || 10
+        );
+    }
 }

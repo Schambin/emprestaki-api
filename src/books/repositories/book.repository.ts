@@ -74,4 +74,38 @@ export class BookRepository {
             this.handleDatabaseError(error, `Failed to delete book ${id}`);
         }
     }
+
+    async searchBooks(searchTerm: string, page: number = 1, pageSize: number = 10) {
+        try {
+            const whereClause: Prisma.BookWhereInput = {
+                OR: [
+                    { title: { contains: searchTerm, mode: 'insensitive' } },
+                    { author: { contains: searchTerm, mode: 'insensitive' } },
+                    { category: { contains: searchTerm, mode: 'insensitive' } }
+                ]
+            };
+
+            const [books, totalCount] = await prisma.$transaction([
+                prisma.book.findMany({
+                    where: whereClause,
+                    skip: (page - 1) * pageSize,
+                    take: pageSize,
+                    orderBy: { title: 'asc' }
+                }),
+                prisma.book.count({ where: whereClause })
+            ]);
+
+            return {
+                data: books,
+                meta: {
+                    total: totalCount,
+                    page,
+                    pageSize,
+                    totalPages: Math.ceil(totalCount / pageSize)
+                }
+            };
+        } catch (error) {
+            throw new DatabaseError('Failed to search books');
+        }
+    }
 }

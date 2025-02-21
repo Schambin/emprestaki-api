@@ -1,6 +1,6 @@
+import { BadRequestError, NotFoundError } from "../../errors/http.errors";
 import { NextFunction, Request, Response } from "express";
 import { BookService } from "../services/books.service";
-import { BadRequestError, NotFoundError } from "../../errors/http.errors";
 
 export class BookController {
     constructor(private bookService = new BookService()) {
@@ -10,7 +10,8 @@ export class BookController {
     private bindMethods() {
         const methods: Array<keyof BookController> = [
             'createBook', 'listBooks', 'getBookById',
-            'updateBook', 'updateBookStatus', 'deleteBook'
+            'updateBook', 'updateBookStatus', 'deleteBook',
+            'searchBooks'
         ];
 
         methods.forEach(m => {
@@ -51,7 +52,13 @@ export class BookController {
 
     async getBookById(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const book = await this.bookService.getBookById(parseInt(req.params.id));
+            const bookId = parseInt(req.params.id);
+
+            if (isNaN(bookId)) {
+                throw new BadRequestError('Invalid book ID format');
+            }
+
+            const book = await this.bookService.getBookById(bookId);
 
             if (!book) {
                 throw new NotFoundError('Book');
@@ -116,6 +123,19 @@ export class BookController {
             res.status(500).json({
                 error: error instanceof Error ? error.message : 'Deletion failed'
             });
+        }
+    }
+
+    async searchBooks(req: Request, res: Response) {
+        try {
+            const searchTerm = req.query.q as string;
+            const page = parseInt(req.query.page as string) || 1;
+            const pageSize = parseInt(req.query.pageSize as string) || 10;
+
+            const result = await this.bookService.searchBooks(searchTerm, page, pageSize);
+            res.json(result);
+        } catch (error) {
+            res.status(500).json({ error: 'Search failed' });
         }
     }
 }

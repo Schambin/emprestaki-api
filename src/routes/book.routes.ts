@@ -1,14 +1,14 @@
-import { Router } from 'express';
-import { createBookSchema } from '../books/schemas/create-book.schema';
-import { updateBookSchema } from '../books/schemas/update-book.schema';
-import { validateRequest } from '../middleware/validate.middleware';
-import { BookController } from '../books/controllers/books.controller';
+import { validateBookId, validateRequest } from '../middleware/validate.middleware';
 import { authenticate, authorize } from '../middleware/auth.middleware';
+import { createBookSchema } from '../books/schemas/create-book.schema';
+import { BookController } from '../books/controllers/books.controller';
+import { updateBookSchema } from '../books/schemas/update-book.schema';
+import { Router } from 'express';
 
 export const bookRoutes = () => {
     const router = Router();
     const controller = new BookController();
-
+    
     router.post(
         '/',
         authenticate,
@@ -16,13 +16,19 @@ export const bookRoutes = () => {
         validateRequest(createBookSchema),
         controller.createBook
     );
-
-
+    
+    router.get('/search',
+        authenticate,
+        authorize(['LEITOR', 'ADMINISTRADOR']),
+        controller.searchBooks
+    );
+    
     router.get('/',
         controller.listBooks
     );
 
     router.get('/:id',
+        validateBookId,
         controller.getBookById
     );
 
@@ -38,6 +44,7 @@ export const bookRoutes = () => {
         authorize(['ADMINISTRADOR']),
         controller.deleteBook
     );
+
 
     return router;
 }
