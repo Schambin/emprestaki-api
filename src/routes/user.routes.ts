@@ -1,5 +1,5 @@
-import { updateUserSchema } from "../users/schemas/update-user.schema";
 import { updateCurrentUserSchema } from "../users/schemas/create-user.schema";
+import { updateUserSchema } from "../users/schemas/update-user.schema";
 import { authenticate, authorize } from "../middleware/auth.middleware";
 import { UserController } from "../users/controllers/user.controller";
 import { validateRequest } from "../middleware/validate.middleware";
