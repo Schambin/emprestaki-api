@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { ZodError } from 'zod';
 import { HttpError } from '../errors/http.errors';
+import { ZodError } from 'zod';
 
 export function errorHandler(
   err: Error,
@@ -12,7 +12,6 @@ export function errorHandler(
   let message = 'Something went wrong';
   let details: Record<string, unknown> = {};
 
-  // Handle Zod validation errors
   if (err instanceof ZodError) {
     const formattedErrors = err.errors.map(error => ({
       path: error.path.join('.'),
@@ -31,14 +30,12 @@ export function errorHandler(
     });
   }
 
-  // Handle custom HTTP errors
   if (err instanceof HttpError) {
     status = err.statusCode;
     message = err.message;
     if (err.details) details = err.details;
   }
 
-  // Handle specific error names
   switch (err.name) {
     case 'BookNotAvailableError':
       status = 409;
@@ -51,7 +48,14 @@ export function errorHandler(
       break;
   }
 
-  // Log unexpected errors
+  console.error('Unexpected error:', err);
+  res.status(500).json({
+    error: {
+      type: 'InternalServerError',
+      message: 'Something went wrong'
+    }
+  });
+
   if (status === 500) {
     console.error('Unexpected error:', err);
   }
