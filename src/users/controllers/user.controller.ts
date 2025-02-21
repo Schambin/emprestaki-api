@@ -1,8 +1,8 @@
 import { CreateUserInput, UpdateCurrentUserInput, UpdateUserInput } from '../schemas/create-user.schema';
 import { BadRequestError, NotFoundError } from '../../errors/http.errors';
+import { NextFunction, Request, Response } from 'express';
 import { UserService } from '../services/user.service';
 import { SafeUser } from '../../users/types/user';
-import { Request, Response } from 'express';
 
 export class UserController {
     constructor(private userService = new UserService()) {
@@ -20,7 +20,7 @@ export class UserController {
         });
     }
 
-    async createUser(req: Request, res: Response): Promise<void> {
+    async createUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const user = await this.userService.createUser(req.body as CreateUserInput);
             res.status(201).json(user);
@@ -29,7 +29,8 @@ export class UserController {
                 res.status(400).json({ error: error.message });
                 return;
             }
-            res.status(500).json({ error: 'Registration failed' });
+            // res.status(500).json({ error: 'Registration failed' });
+            next(error)
         }
     }
 
