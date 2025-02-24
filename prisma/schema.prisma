@@ -79,7 +79,7 @@ model Loan {
   returnDate   DateTime?
   fineAmount   Float     @default(0)
   paid         Boolean   @default(false)
-  payment      Payment?
+  payment      Payment[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
@@ -96,7 +96,7 @@ model Payment {
   id          Int      @id @default(autoincrement())
   userId      Int
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  loanId      Int      @unique
+  loanId      Int     
   loan        Loan     @relation(fields: [loanId], references: [id], onDelete: Cascade)
   amount      Float
   paymentDate DateTime @default(now())
