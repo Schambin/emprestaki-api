@@ -4,6 +4,8 @@ import { calculateDueDate, calculateFine } from "../utils/loan.utils";
 import { LoanRepository } from "../repositories/loan.repository";
 import { BookService } from "../../books/services/books.service";
 import { UserService } from "../../users/services/user.service";
+import { NotFoundError } from "../../errors/http.errors";
+import { PaymentRepository } from "../../payments/repositories/payments.repository";
 
 interface LoanUpdateData {
     returnDate: Date;
@@ -13,6 +15,7 @@ interface LoanUpdateData {
 export class LoanService {
     constructor(
         private loanRepository = new LoanRepository(),
+        private paymentRepository = new PaymentRepository(),
         private bookService = new BookService(),
         private userService = new UserService(),
     ) { }
@@ -73,5 +76,15 @@ export class LoanService {
             ...loan,
             currentFine: calculateFine(loan.dueDate)
         }));
+    }
+
+    async getRemainingBalance(loanId: number) {
+        const loan = await this.loanRepository.findById(loanId);
+        if (!loan) throw new NotFoundError("Loan");
+
+        const payments = await this.paymentRepository.getPaymentsByLoan(loanId);
+        const totalPaid = payments.reduce((sum, payment) => sum + payment.amount, 0);
+
+        return loan.fineAmount - totalPaid;
     }
 }
