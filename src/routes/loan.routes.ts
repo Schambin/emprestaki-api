@@ -34,5 +34,11 @@ export const loanRoutes = () => {
         controller.getOverdueLoans
     );
 
+    router.get('/:id/remaining-balance',
+        authenticate,
+        authorize(['ADMINISTRADOR', 'LEITOR']),
+        controller.getRemainingBalance
+    );
+
     return router;
 }
