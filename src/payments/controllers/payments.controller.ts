@@ -3,15 +3,34 @@ import { PaymentService } from "../service/payments.service";
 import { Request, Response } from "express";
 
 export class PaymentController {
-    private paymentService = new PaymentService();
+    private paymentService: PaymentService;
+
+    constructor() {
+        this.paymentService = new PaymentService();
+        this.bindMethods();
+    }
+
+    private bindMethods() {
+        const methods: Array<keyof PaymentController> = [
+            'createPayment', 'getLoanPayments', 'getPaymentDetails',
+            'getUserPayments'
+        ];
+
+        methods.forEach(method => {
+            this[method] = this[method].bind(this);
+        });
+    }
 
     async createPayment(req: Request, res: Response) {
         try {
+            console.log("Request body:", req.body); // Debugging
             const userId = req.user!.id;
             const { loanId, amount } = req.body;
+            console.log("Creating payment for user:", userId, "loan:", loanId, "amount:", amount); // Debugging
             const payment = await this.paymentService.createPayment(userId, loanId, amount);
             res.status(201).json({ message: "Payment created", payment });
         } catch (error) {
+            console.error("Error creating payment:", error); // Debugging
             if (error instanceof BadRequestError || error instanceof NotFoundError) {
                 res.status(error.statusCode).json({ error: error.message });
                 return;
@@ -22,10 +41,16 @@ export class PaymentController {
 
     async getPaymentDetails(req: Request, res: Response) {
         try {
+            console.log("Fetching payment details for ID:", req.params.id); // Debugging
             const paymentId = parseInt(req.params.id);
+            if (isNaN(paymentId)) {
+                throw new BadRequestError("Invalid payment ID");
+            }
             const payment = await this.paymentService.getPaymentDetails(paymentId);
+            console.log("Payment found:", payment); // Debugging
             res.json({ payment });
         } catch (error) {
+            console.error("Error fetching payment details:", error); // Debugging
             if (error instanceof NotFoundError) {
                 res.status(404).json({ error: error.message });
                 return;
