@@ -20,13 +20,21 @@ export class PaymentService {
             throw new BadRequestError("No fine associated with this loan");
         }
 
+        const existingPayments = await this.paymentRepository.getPaymentsByLoan(loanId);
+        const totalPaid = existingPayments.reduce((sum, payment) => sum + payment.amount, 0);
+        const remainingBalance = loan.fineAmount - totalPaid;
+
+        if (amount > remainingBalance) {
+            throw new BadRequestError(`Payment exceeds remaining balance of $${remainingBalance}`);
+        }
+
         const payment = await this.paymentRepository.createPayment({
             userId,
             loanId,
             amount,
         });
 
-        if (amount >= loan.fineAmount) {
+        if (totalPaid + amount >= loan.fineAmount) {
             await this.loanRepository.update(loanId, { paid: true });
         }
 
@@ -34,10 +42,12 @@ export class PaymentService {
     }
 
     async getPaymentDetails(paymentId: number) {
+        console.log("Fetching payment from repository for ID:", paymentId); // Debugging
         const payment = await this.paymentRepository.getPaymentById(paymentId);
         if (!payment) {
             throw new NotFoundError("Payment not found");
         }
+        console.log("Payment retrieved:", payment); // Debugging
         return payment;
     }
 
