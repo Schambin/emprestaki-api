@@ -21,13 +21,6 @@ export const paymentRoutes = () => {
     );
 
     router.get(
-        "/user/:userId",
-        authenticate,
-        authorize(["ADMINISTRADOR"]),
-        controller.getUserPayments
-    );
-
-    router.get(
         "/me",
         authenticate,
         authorize(["LEITOR", "ADMINISTRADOR"]),
@@ -37,7 +30,7 @@ export const paymentRoutes = () => {
     router.get(
         "/loan/:loanId",
         authenticate,
-        authorize(["LEITOR", "ADMINISTRADOR"]),
+        authorize(["ADMINISTRADOR"]),
         controller.getLoanPayments
     );
 
