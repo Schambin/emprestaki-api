@@ -1,5 +1,5 @@
+import { BadRequestError, DatabaseError, NotFoundError } from "../../errors/http.errors";
 import { LoanRepository } from "../../loans/repositories/loan.repository";
-import { BadRequestError, NotFoundError } from "../../errors/http.errors";
 import { PaymentRepository } from "../repositories/payments.repository";
 
 export class PaymentService {
@@ -42,18 +42,55 @@ export class PaymentService {
     }
 
     async getPaymentDetails(paymentId: number) {
-        console.log("Fetching payment from repository for ID:", paymentId); // Debugging
         const payment = await this.paymentRepository.getPaymentById(paymentId);
         if (!payment) {
             throw new NotFoundError("Payment not found");
         }
-        console.log("Payment retrieved:", payment); // Debugging
         return payment;
     }
 
-    async getUserPayments(userId: number) {
-        return this.paymentRepository.getPaymentsByUser(userId);
+    async getUserPayments(
+        userId: number,
+        filters?: {
+            minAmount?: number;
+            maxAmount?: number;
+            startDate?: Date;
+            endDate?: Date;
+        },
+        pagination?: {
+            page: number;
+            pageSize: number;
+        },
+        sort?: {
+            field: "amount" | "paymentDate";
+            order: "asc" | "desc";
+        }
+    ) {
+        try {
+            const { data, total } = await this.paymentRepository.findUserPayments(
+                userId,
+                filters,
+                pagination,
+                sort
+            );
+
+            const page = pagination?.page || 1;
+            const pageSize = pagination?.pageSize || 10;
+
+            return {
+                data,
+                meta: {
+                    total,
+                    page,
+                    pageSize,
+                    totalPages: Math.ceil(total / pageSize),
+                },
+            };
+        } catch (error) {
+            throw new DatabaseError("Failed to fetch user payments");
+        }
     }
+
 
     async getLoanPayments(loanId: number) {
         return this.paymentRepository.getPaymentsByLoan(loanId);
