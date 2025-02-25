@@ -21,11 +21,18 @@ export const paymentRoutes = () => {
     );
 
     router.get(
-        "/user",
+        "/user/:userId",
+        authenticate,
+        authorize(["ADMINISTRADOR"]),
+        controller.getUserPayments
+    );
+
+    router.get(
+        "/me",
         authenticate,
         authorize(["LEITOR", "ADMINISTRADOR"]),
         controller.getUserPayments
-    );
+    )
 
     router.get(
         "/loan/:loanId",
