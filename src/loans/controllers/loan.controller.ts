@@ -14,7 +14,7 @@ export class LoanController {
     private bindMethods() {
         const methods: Array<keyof LoanController> = [
             'createLoan', 'returnBook', 'getUserLoans',
-            'getOverdueLoans'
+            'getOverdueLoans', 'getRemainingBalance'
         ];
 
         methods.forEach(m => {
@@ -79,7 +79,7 @@ export class LoanController {
         try {
             const loanId = parseInt(req.params.id);
             const remainingLoans = await this.loanService.getRemainingBalance(loanId);
-            res.json(remainingLoans);
+            res.json({ 'Remaining balance': remainingLoans });
         } catch (error) {
             res.status(500).json({ error: 'Failed to retieve balance' });
         }
