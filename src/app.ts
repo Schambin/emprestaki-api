@@ -1,8 +1,8 @@
 import { checkDatabaseConnection } from './prisma/connect';
+import { paymentRoutes } from './routes/payments.routes';
 import { bookRoutes } from './routes/book.routes';
 import { loanRoutes } from './routes/loan.routes';
 import { userRoutes } from './routes/user.routes';
-import { paymentRoutes } from './routes/payments.routes';
 import seedAdminUser from './utilities/seed';
 import express from 'express';
 
