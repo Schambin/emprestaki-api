@@ -22,15 +22,16 @@ export class BadRequestError extends HttpError {
     }
 }
 
-
 export class UnauthorizedError extends HttpError {
     constructor(message = "Unauthorized") {
         super(401, message);
     }
 }
-export class ForbiddenError extends HttpError {
-    constructor(message = "Forbidden") {
-        super(403, message);
+export class ForbiddenError extends Error {
+    statusCode = 403;
+    constructor(message: string = "Forbidden") {
+        super(message);
+        this.name = "ForbiddenError";
     }
 }
 

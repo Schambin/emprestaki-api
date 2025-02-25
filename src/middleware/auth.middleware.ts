@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { SafeUser } from "../users/types/user";
 import prisma from "../prisma/client";
 import jwt from "jsonwebtoken";
+import { z } from "zod";
 
 declare module 'express' {
     interface Request {
@@ -42,12 +43,23 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     }
 };
 
-export const authorize = (allowedRoles: string[]) => {
+const RoleSchema = z.enum(["LEITOR", "ADMINISTRADOR"]);
+
+export const authorize = (allowedRoles: z.infer<typeof RoleSchema>[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!req.user || !allowedRoles.includes(req.user.role)) {
-                throw new ForbiddenError();
+            // Validate allowedRoles with Zod
+            RoleSchema.array().parse(allowedRoles);
+
+            if (!req.user) {
+                throw new ForbiddenError("Authentication required");
             }
+
+            if (!allowedRoles.includes(req.user.role)) {
+                const rolesText = allowedRoles.join(" or ");
+                throw new ForbiddenError(`Only ${rolesText} can perform this action`);
+            }
+
             next();
         } catch (error) {
             next(error);
