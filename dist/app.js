@@ -13,12 +13,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.app = void 0;
-const express_1 = __importDefault(require("express"));
 const connect_1 = require("./prisma/connect");
+const payments_routes_1 = require("./routes/payments.routes");
 const book_routes_1 = require("./routes/book.routes");
 const loan_routes_1 = require("./routes/loan.routes");
 const user_routes_1 = require("./routes/user.routes");
 const seed_1 = __importDefault(require("./utilities/seed"));
+const express_1 = __importDefault(require("express"));
 exports.app = (0, express_1.default)();
 const port = process.env.PORT || 8888;
 function startServer() {
@@ -30,6 +31,7 @@ function startServer() {
             exports.app.use('/api/books', (0, book_routes_1.bookRoutes)());
             exports.app.use('/api/loans', (0, loan_routes_1.loanRoutes)());
             exports.app.use('/api/users', (0, user_routes_1.userRoutes)());
+            exports.app.use('/api/payments', (0, payments_routes_1.paymentRoutes)());
             exports.app.listen(port, () => {
                 console.log(`App is runing on PORT ${port}`);
             });
