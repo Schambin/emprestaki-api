@@ -19,6 +19,40 @@ export class BookController {
         });
     }
 
+    /**
+    * @swagger
+    * /books:
+    *   post:
+    *     summary: Cria um novo livro
+    *     tags: [Books]
+    *     security:
+    *       - bearerAuth: []
+    *     requestBody:
+    *       required: true
+    *       content:
+    *         application/json:
+    *           schema:
+    *             $ref: '#/components/schemas/CreateBookInput'
+    *     responses:
+    *       201:
+    *         description: Livro criado com sucesso
+    *         content:
+    *           application/json:
+    *             schema:
+    *               $ref: '#/components/schemas/Book'
+    *       400:
+    *         description: |
+    *           Erros de validação:
+    *           - Título deve ter 2-100 caracteres
+    *           - Autor deve ter 2-50 caracteres
+    *           - Categoria deve ter 2-50 caracteres
+    *       401:
+    *         description: Não autenticado
+    *       403:
+    *         description: Acesso negado (apenas ADMINISTRADOR)
+    *       500:
+    *         description: Erro interno no servidor
+    */
     async createBook(req: Request, res: Response): Promise<void> {
         try {
             const { title, author, category, status } = req.body;
@@ -50,6 +84,32 @@ export class BookController {
         }
     }
 
+    /**
+     * @swagger
+     * /books/{id}:
+     *   get:
+     *     summary: Busca livro por ID
+     *     tags: [Books]
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         schema:
+     *           type: integer
+     *         required: true
+     *     responses:
+     *       200:
+     *         description: Livro encontrado
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/Book'
+     *       400:
+     *         description: ID inválido
+     *       404:
+     *         description: Livro não encontrado
+     *       500:
+     *         description: Erro interno no servidor
+     */
     async getBookById(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const bookId = parseInt(req.params.id);
@@ -76,6 +136,44 @@ export class BookController {
         }
     }
 
+    /**
+     * @swagger
+     * /books/{id}:
+     *   put:
+     *     summary: Atualiza um livro existente
+     *     tags: [Books]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         schema:
+     *           type: integer
+     *         required: true
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: '#/components/schemas/UpdateBookInput'
+     *     responses:
+     *       200:
+     *         description: Livro atualizado
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/Book'
+     *       400:
+     *         description: Dados inválidos
+     *       401:
+     *         description: Não autenticado
+     *       403:
+     *         description: Acesso negado (apenas ADMINISTRADOR)
+     *       404:
+     *         description: Livro não encontrado
+     *       500:
+     *         description: Erro interno no servidor
+     */
     async updateBook(req: Request, res: Response): Promise<void> {
         try {
             const updatedBook = await this.bookService.updateBook(
@@ -111,6 +209,32 @@ export class BookController {
         }
     }
 
+    /**
+     * @swagger
+     * /books/{id}:
+     *   delete:
+     *     summary: Exclui um livro
+     *     tags: [Books]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         schema:
+     *           type: integer
+     *         required: true
+     *     responses:
+     *       200:
+     *         description: Livro excluído com sucesso
+     *       401:
+     *         description: Não autenticado
+     *       403:
+     *         description: Acesso negado (apenas ADMINISTRADOR)
+     *       404:
+     *         description: Livro não encontrado
+     *       500:
+     *         description: Erro interno no servidor
+     */
     async deleteBook(req: Request, res: Response): Promise<void> {
         try {
             await this.bookService.deleteBook(parseInt(req.params.id));

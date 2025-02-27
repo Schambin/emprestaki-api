@@ -1,5 +1,33 @@
 import { z } from 'zod';
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     CreateBookInput:
+ *       type: object
+ *       required:
+ *         - title
+ *         - author
+ *         - category
+ *       properties:
+ *         title:
+ *           type: string
+ *           minLength: 2
+ *           maxLength: 100
+ *         author:
+ *           type: string
+ *           minLength: 2
+ *           maxLength: 50
+ *         category:
+ *           type: string
+ *           minLength: 2
+ *           maxLength: 50
+ *         status:
+ *           type: string
+ *           enum: [AVAILABLE, RENTED]
+ *           default: AVAILABLE
+ */
 export const createBookSchema = z.object({
     title: z.string({
         required_error: 'Title is required',
