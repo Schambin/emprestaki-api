@@ -16,13 +16,13 @@ export const bookRoutes = () => {
         validateRequest(createBookSchema),
         controller.createBook
     );
-    
+
     router.get('/search',
         authenticate,
         authorize(['LEITOR', 'ADMINISTRADOR']),
         controller.searchBooks
     );
-    
+
     router.get('/',
         controller.listBooks
     );

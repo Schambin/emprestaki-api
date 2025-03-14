@@ -1,7 +1,35 @@
 import { z } from 'zod';
 
-export const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{6,}$/;
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     CreateUserInput:
+ *       type: object
+ *       required:
+ *         - name
+ *         - email
+ *         - password
+ *         - role
+ *       properties:
+ *         name:
+ *           type: string
+ *           minLength: 2
+ *           maxLength: 50
+ *         email:
+ *           type: string
+ *         password:
+ *           type: string
+ *           minLength: 6
+ *           maxLength: 50
+ *           
+ *         role:
+ *           type: string
+ *           enum: [LEITOR, ADMINISTRADOR]
+ *           default: LEITOR
+ */
 
+export const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{6,}$/;
 export const createUserSchema = z.object({
     name: z.string()
         .min(2, "Name must be at least 2 characters")

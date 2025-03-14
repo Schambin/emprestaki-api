@@ -8,6 +8,12 @@ import { createUserSchema } from "../schemas/user.schema";
 import { Router } from "express"
 import { z } from "zod";
 
+/**
+ * @swagger
+ * tags:
+ *   - name: Auth
+ *     description: Operações de autenticação de usuários
+ */
 export const userRoutes = () => {
     const router = Router();
     const userController = new UserController();
@@ -38,6 +44,38 @@ export const userRoutes = () => {
         userController.getCurrentUser
     );
 
+    /**
+     * @swagger
+     * /auth/login:
+     *   post:
+     *     summary: Autentica usuário e retorna token JWT
+     *     tags: [Auth]
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               email:
+     *                 type: string
+     *                 format: email
+     *               password:
+     *                 type: string
+     *                 format: password
+     *             required:
+     *               - email
+     *               - password
+     *     responses:
+     *       200:
+     *         description: Token JWT gerado com sucesso
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/AuthToken'
+     *       401:
+     *         description: Credenciais inválidas
+     */
     router.post('/auth/login',
         validateRequest(z.object({
             email: z.string().email(),
